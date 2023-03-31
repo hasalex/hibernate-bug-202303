@@ -1,0 +1,39 @@
+= Hibernate Bug
+
+It reproduces a bug with Hibernate 6 when using filters and query cache.
+
+== Run
+
+The example uses a JDK 11.
+
+To reproduce the example, run `info.jtips.bug.Application` class and see stdout.
+
+----
+mvn exec:java -Dexec.mainClass=info.jtips.bug.Application
+----
+
+In the example, 2nd level cache is enabled, with JCache RI.
+You should see something like this:
+
+----
+Exception in thread "main" java.lang.IllegalArgumentException: Failed to serialize: org.hibernate.cache.spi.QueryKey@5952aaa5 due to java.util.HashMap$KeySet
+	at org.jsr107.ri.RISerializingInternalConverter$Serialized.<init>(RISerializingInternalConverter.java:127)
+	at org.jsr107.ri.RISerializingInternalConverter.toInternal(RISerializingInternalConverter.java:74)
+    at ...
+----
+
+== Make it work
+
+If you disable query cache, it will work:
+
+.persistence.xml
+----
+            <property name="hibernate.cache.use_query_cache" value="true"/>
+----
+
+Or it will work with query cache and disable filter
+
+.Application.java
+----
+    private static final boolean ENABLE_FILTER = true;
+----
